@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Union
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -12,7 +13,7 @@ from outputs import control_output
 from utils import find_tag, find_tag_by_lambda, get_response
 
 
-def whats_new(session: CachedSession) -> list[tuple] | None:
+def whats_new(session: CachedSession) -> Union[list[tuple], None]:
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     response = get_response(session, whats_new_url)
     if response is None:
@@ -46,7 +47,7 @@ def whats_new(session: CachedSession) -> list[tuple] | None:
     return results
 
 
-def latest_versions(session: CachedSession) -> list[tuple] | None:
+def latest_versions(session: CachedSession) -> Union[list[tuple], None]:
     response = get_response(session, MAIN_DOC_URL)
     if response is None:
 
