@@ -130,7 +130,7 @@ def pep(session: CachedSession) -> list[tuple]:
         pep_soup = BeautifulSoup(cur_pep_response.text, 'lxml')
         dt_tag = find_tag_by_lambda(pep_soup, (lambda tag: tag.name == 'dt'
                                                and 'Status' in tag.text))
-        pep_status_from_href = dt_tag.find_next_sibling('dd').string
+        pep_status_from_href = dt_tag.find_next_sibling('dd').text
 
         if pep_status_from_href not in EXPECTED_STATUS[pep_status]:
             if results.get(pep_status_from_href) is None:
