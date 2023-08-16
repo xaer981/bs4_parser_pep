@@ -5,7 +5,7 @@ from argparse import Namespace
 
 from prettytable import PrettyTable
 
-from constants import BASE_DIR, DATETIME_FORMAT
+from constants import BASE_DIR, DATETIME_FORMAT, RESULTS_DIR_NAME
 
 
 def control_output(results: list[tuple], cli_args: Namespace) -> None:
@@ -32,7 +32,7 @@ def pretty_output(results: list[tuple]) -> None:
 
 
 def file_output(results: list[tuple], cli_args: Namespace) -> None:
-    results_dir = BASE_DIR / 'results'
+    results_dir = BASE_DIR / RESULTS_DIR_NAME
     results_dir.mkdir(exist_ok=True)
     parser_mode = cli_args.mode
     now = dt.datetime.now()

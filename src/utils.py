@@ -8,10 +8,12 @@ from requests_cache import CachedSession, Response
 from exceptions import ParserFindTagException
 
 
-def get_response(session: CachedSession, url: str) -> Response:
+def get_response(session: CachedSession,
+                 url: str,
+                 encoding: str = 'utf-8') -> Response:
     try:
         response = session.get(url)
-        response.encoding = 'utf-8'
+        response.encoding = encoding
 
         return response
 

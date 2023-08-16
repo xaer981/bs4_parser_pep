@@ -1,5 +1,6 @@
 import logging
 import re
+from collections import defaultdict
 from typing import Union
 from urllib.parse import urljoin
 
@@ -8,7 +9,10 @@ from requests_cache import CachedSession
 from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
-from constants import BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_URL
+from constants import (BASE_DIR, DOWNLOADS_DIR_NAME, EXPECTED_STATUS,
+                       LATEST_VERSIONS_TITLES, MAIN_DOC_URL, PEP_TITLES,
+                       PEP_URL, WHATS_NEW_TITLES)
+from exceptions import NotFoundVersionsException
 from outputs import control_output
 from utils import find_tag, find_tag_by_lambda, get_response
 
@@ -27,7 +31,7 @@ def whats_new(session: CachedSession) -> Union[list[tuple], None]:
     sections_by_python = div_with_ul.find_all('li',
                                               attrs={'class': 'toctree-l1'})
 
-    results = [('Ссылка на статью', 'Заголовок', 'Редактор, Автор')]
+    results = [WHATS_NEW_TITLES]
     for section in tqdm(sections_by_python):
         version_a_tag = find_tag(section, 'a')
         href = version_a_tag['href']
@@ -63,9 +67,9 @@ def latest_versions(session: CachedSession) -> Union[list[tuple], None]:
             break
 
     else:
-        raise Exception('Ничего не нашлось')
+        raise NotFoundVersionsException('Ничего не нашлось')
 
-    results = [('Ссылка на документацию', 'Версия', 'Статус')]
+    results = [LATEST_VERSIONS_TITLES]
 
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
 
@@ -96,7 +100,7 @@ def download(session: CachedSession) -> None:
     archive_url = urljoin(downloads_url, pdf_a4_link)
 
     filename = archive_url.split('/')[-1]
-    downloads_dir = BASE_DIR / 'downloads'
+    downloads_dir = BASE_DIR / DOWNLOADS_DIR_NAME
     downloads_dir.mkdir(exist_ok=True)
     archive_path = downloads_dir / filename
 
@@ -117,8 +121,7 @@ def pep(session: CachedSession) -> list[tuple]:
     section = find_tag(soup, 'section', attrs={'id': 'numerical-index'})
     tr_tags = section.tbody.find_all('tr')
 
-    statuses = [status for val in EXPECTED_STATUS.values() for status in val]
-    results = {status: 0 for status in statuses}
+    results = defaultdict(int)
 
     for tr in tqdm(tr_tags, desc='Список PEP обрабатывается...'):
         pep_status, pep_href = tr.abbr.text[1:], tr.a['href']
@@ -134,9 +137,6 @@ def pep(session: CachedSession) -> list[tuple]:
         pep_status_from_href = dt_tag.find_next_sibling('dd').text
 
         if pep_status_from_href not in EXPECTED_STATUS[pep_status]:
-            if results.get(pep_status_from_href) is None:
-                results[pep_status_from_href] = 0
-
             logging.error(f'Статусы не совпадают: {cur_pep_link}\n'
                           f'Статус в карточке: {pep_status_from_href}\n'
                           f'Ожидаемые статусы: {EXPECTED_STATUS[pep_status]}')
@@ -145,7 +145,7 @@ def pep(session: CachedSession) -> list[tuple]:
 
     results['Total'] = sum(results.values())
     results = list(results.items())
-    results.insert(0, ('Статус', 'Количество'))
+    results.insert(0, PEP_TITLES)
 
     return results
 
