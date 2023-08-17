@@ -20,7 +20,8 @@ EXPECTED_STATUS = {
         'W': ('Withdrawn',),
         '': ('Draft', 'Active'),
     }
-OUTPUT_TYPES = ('pretty', 'file')
+FILE_OUTPUT = 'file'
+PRETTY_OUTPUT = 'pretty'
 
 LATEST_VERSIONS_TITLES = ('Ссылка на документацию', 'Версия', 'Статус')
 PEP_TITLES = ('Статус', 'Количество')
